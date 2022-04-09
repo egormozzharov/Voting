@@ -1,0 +1,2 @@
+# Voting
+Voting smart contract
