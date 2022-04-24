@@ -76,7 +76,7 @@ contract VotingContract {
         external
         payable
     {
-        require(votings[votingName].votingState == VotingState.InProgress, "it must be in InProgress votingState");
+        require(votings[votingName].votingState == VotingState.InProgress, "It must be in InProgress votingState");
         require(block.timestamp >= votings[votingName].startDate + 3 minutes, "You can end voting only after 3 minutes");
 
         Voting storage voting = votings[votingName];
@@ -93,7 +93,7 @@ contract VotingContract {
         payable 
     {
         require(msg.sender == contractOwner, "Only contractOwner can start and end the voting");
-        require(votings[voteName].votingState == VotingState.Ended, "it must be in Ended votingState");
+        require(votings[voteName].votingState == VotingState.Ended, "It must be in Ended votingState");
         require(votings[voteName].withDrawOccured == false, "Withdraw for this voting has already been made");
 
         Voting storage voting = votings[voteName];
@@ -107,10 +107,20 @@ contract VotingContract {
     function getVotingInfo(string calldata votingName) 
         external 
         view
-        returns (VotingState votingState, uint votingBalance, bool withDrawOccured, address winnerAddress)
+        returns (VotingState votingState, uint votingBalance, bool withDrawOccured, address winnerAddress, address[] memory candidatesAddresses)
     {
         Voting storage voting = votings[votingName];
-        return (voting.votingState, voting.votingBalance, voting.withDrawOccured, voting.winnerCandidate.candidateAddress);
+        return (voting.votingState, voting.votingBalance, voting.withDrawOccured, voting.winnerCandidate.candidateAddress, voting.candidatesAddresses);
+    }
+
+    function getVotingCandidateInfo(string calldata votingName, address candidateAddress)
+        public
+        view
+        returns (Candidate memory candidate)  
+    {
+        Voting storage voting = votings[votingName];
+        candidate = voting.candidates[candidateAddress];
+        return candidate;
     }
 
     function getWinnerCandidate(string calldata votingName) 
