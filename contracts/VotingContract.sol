@@ -36,7 +36,7 @@ contract VotingContract {
         contractOwner = payable(msg.sender);
     }
 
-    function createVote(string calldata voteName, Candidate[] calldata candidatesParams) 
+    function createVote(string calldata voteName, Candidate[] calldata candidatesParams)
         external
     {   
         require(msg.sender == contractOwner, "Only contractOwner can start and end the voting");
@@ -119,8 +119,16 @@ contract VotingContract {
         returns (Candidate memory candidate)  
     {
         Voting storage voting = votings[votingName];
-        candidate = voting.candidates[candidateAddress];
-        return candidate;
+        return voting.candidates[candidateAddress];
+    }
+
+    function getVoterInfo(string calldata votingName, address voterAddress)
+        public
+        view
+        returns (Voter memory voter)
+    {
+        Voting storage voting = votings[votingName];
+        return voting.voters[voterAddress];
     }
 
     function getWinnerCandidate(string calldata votingName) 
@@ -141,6 +149,6 @@ contract VotingContract {
                 winner = candidate;
             }
         }
-        return candidate;
+        return winner;
     }
 }
