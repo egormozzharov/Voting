@@ -13,7 +13,7 @@ contract VotingContract {
         mapping (address => Voter) voters;
         uint votingBalance;
         bool withDrawOccured;
-        uint startDate;
+        uint256 startDate;
         Candidate winnerCandidate;
     }
 
@@ -28,7 +28,7 @@ contract VotingContract {
         uint voteCount; 
     }
 
-    enum VotingState { NotCreated, Created, InProgress, Ended }
+    enum VotingState { NotCreated, InProgress, Ended }
 
     address payable public contractOwner;
     
@@ -36,16 +36,16 @@ contract VotingContract {
         contractOwner = payable(msg.sender);
     }
 
-    function createVote(string calldata voteName, Candidate[] calldata candidatesParams)
+    function createVote(string calldata voteName, Candidate[] calldata candidatesParams, uint256 startDate)
         external
     {   
         require(msg.sender == contractOwner, "Only contractOwner can start and end the voting");
 
         Voting storage voting = votings[voteName];
-        voting.votingState = VotingState.Created;
+        voting.votingState = VotingState.InProgress;
         voting.votingBalance = 0;
         voting.withDrawOccured = false;
-        voting.startDate = block.timestamp;
+        voting.startDate = startDate;
 
         mapping(address => Candidate) storage candidates = voting.candidates;
         address[] storage candidatesAddresses = voting.candidatesAddresses;
