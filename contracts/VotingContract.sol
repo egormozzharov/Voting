@@ -63,7 +63,7 @@ contract VotingContract {
     {
         Voting storage voting = votings[voteName];
 
-        require(msg.value == 10000000000000000, "Your payment should be equal to 10000000000000000 wei");
+        require(msg.value == 0.01 ether, "Your payment should be equal to 10000000000000000 wei");
         require(voting.voters[msg.sender].voted == false, "You already voted");
 
         voting.votingBalance = voting.votingBalance + msg.value;
@@ -90,7 +90,7 @@ contract VotingContract {
 
     function widthdraw(string calldata voteName) 
         external 
-        payable 
+        payable
     {
         require(msg.sender == contractOwner, "Only contractOwner can start and end the voting");
         require(votings[voteName].votingState == VotingState.Ended, "It must be in Ended votingState");

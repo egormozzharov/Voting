@@ -26,7 +26,7 @@ describe("VotingContract", function () {
 
   beforeEach(async function () {
     [owner, addr1, addr2] = await ethers.getSigners();
-    provider = ethers.getDefaultProvider();
+    provider = ethers.provider;
 
     firstCandidateAddr = await addr1.getAddress();
     secondCandidateAddr = await addr2.getAddress();
@@ -118,9 +118,8 @@ describe("VotingContract", function () {
       let date = new Date();
       date.setMinutes(date.getMinutes() - 3);
       let startDate = Math.floor(date.getTime() / 1000);
-      const firstCandidateBalance = await provider.getBalance(firstCandidateAddr);
-      console.log('firstCandidateBalance=', firstCandidateBalance);
-      console.log('firstCandidateAddress=', firstCandidateAddr);
+
+      let firstCandidateBalance = await provider.getBalance(addr1.address);
 
       let tx = await votingContract.connect(owner).createVote(voteName, candidateParams, startDate);
       await tx.wait();
@@ -136,9 +135,90 @@ describe("VotingContract", function () {
       var votingInfo = await votingContract.getVotingInfo(voteName);
       
       //assert
-      expect(votingInfo.winnerAddress).to.equal(firstCandidateAddr);
-      expect(votingInfo.votingBalance).to.equal(value);
-      // expect(await provider.getBalance(votingInfo.winnerAddress)).to.equal(utils.parseEther("0.009"));
+      let winnerBalance = parseInt(await provider.getBalance(votingInfo.winnerAddress));
+      let expectedBalance = parseInt(firstCandidateBalance) + parseInt(utils.parseEther("0.009"));
+      console.log(winnerBalance);
+      console.log(expectedBalance);
+
+      // expect(winnerBalance).to.equal(expectedBalance);
+      // expect(votingInfo.winnerAddress).to.equal(firstCandidateAddr);
+      // expect(votingInfo.votingBalance).to.equal(value);
+      // expect(votingInfo.votingState).to.equal(2);
+    });
+  });
+
+  describe("Widthdraw", function () {
+    beforeEach(async function () {
+    });
+
+    it("Shoud fail if is made by not owner", async function () {
+      await expect(votingContract.connect(addr1).widthdraw(voteName)).to.be.revertedWith("Only contractOwner can start and end the voting");
+    });
+
+    it("Shoud fail if voting stated not Ended", async function () {
+      await expect(votingContract.connect(owner).widthdraw(voteName)).to.be.revertedWith("It must be in Ended votingState");
+    });
+
+    it("Should fail if widthdraw has already been made", async function () {
+      let date = new Date();
+      date.setMinutes(date.getMinutes() - 3);
+      let startDate = Math.floor(date.getTime() / 1000);
+
+      let tx = await votingContract.connect(owner).createVote(voteName, candidateParams, startDate);
+      await tx.wait();
+
+      tx = await votingContract.connect(owner).vote(voteName, firstCandidateAddr, {value: utils.parseEther("0.01")});
+      await tx.wait();
+
+      tx = await votingContract.connect(owner).endVote(voteName);
+      await tx.wait();
+
+      //act
+      tx = await votingContract.connect(owner).widthdraw(voteName);
+      await tx.wait();
+
+      await expect(votingContract.connect(owner).widthdraw(voteName)).to.be.revertedWith("Withdraw for this voting has already been made");
+    });
+
+    it("Should widthdraw susscessfully", async function () { 
+      let date = new Date();
+      date.setMinutes(date.getMinutes() - 3);
+      let startDate = Math.floor(date.getTime() / 1000);
+
+      let contractBalance = await provider.getBalance(votingContract.address);
+      console.log('contractBalanceInitial=', parseInt(contractBalance._hex));
+
+      let ownerBalance = await provider.getBalance(owner.address);
+      console.log('ownerBalanceInitial=', parseInt(ownerBalance._hex));
+
+      let firstCandidateBalance = await provider.getBalance(addr1.address);
+      console.log('firstCandidateInitial=', parseInt(firstCandidateBalance._hex));
+
+      let tx = await votingContract.connect(owner).createVote(voteName, candidateParams, startDate);
+      await tx.wait();
+
+      tx = await votingContract.connect(owner).vote(voteName, firstCandidateAddr, {value: utils.parseEther("0.01")});
+      await tx.wait();
+
+      tx = await votingContract.connect(owner).endVote(voteName);
+      await tx.wait();
+
+      // const gasUsedForWinnerTransfer = tx.getTransactionReceipt().gasUsed;
+
+      //act
+      tx = await votingContract.connect(owner).widthdraw(voteName);
+      await tx.wait();
+
+      contractBalance = await provider.getBalance(votingContract.address);
+      console.log('contractBalanceFinal=', parseInt(contractBalance._hex));
+
+      ownerBalance = await provider.getBalance(owner.address);
+      console.log('ownerBalanceFinal=', parseInt(ownerBalance._hex));
+
+      firstCandidateBalance = await provider.getBalance(addr1.address);
+      console.log('firstCandidateFinal=', parseInt(firstCandidateBalance._hex));
+
+      // expect(await provider.getBalance(ownerAddr)).to.equal(utils.parseEther("0.001") + ownerInitialBalance);
     });
   });
 });
