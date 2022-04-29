@@ -138,8 +138,8 @@ describe("VotingContract", function () {
 
       //assert
       var votingInfo = await votingContract.getVotingInfo(voteName);
-      let winnerBalance = parseInt(await provider.getBalance(votingInfo.winnerAddress));
-      let expectedBalance = parseInt(firstCandidateBalance) + parseInt(utils.parseEther("0.009"));
+      let winnerBalance = await provider.getBalance(votingInfo.winnerAddress);
+      let expectedBalance = firstCandidateBalance.add(utils.parseEther("0.009"));
 
       expect(winnerBalance).to.equal(expectedBalance);
       expect(votingInfo.winnerAddress).to.equal(firstCandidateAddr);
