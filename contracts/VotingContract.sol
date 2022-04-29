@@ -88,7 +88,7 @@ contract VotingContract {
         winnerAddress.transfer(winnerAmount);
     }
 
-    function widthdraw(string calldata voteName) 
+    function widthdraw(string calldata voteName, address payable withdrawAddress) 
         external 
         payable
     {
@@ -100,7 +100,7 @@ contract VotingContract {
 
         uint votingBalance = voting.votingBalance;
         uint widthdrawAmount = votingBalance / 10;
-        contractOwner.transfer(widthdrawAmount);
+        withdrawAddress.transfer(widthdrawAmount);
         voting.withDrawOccured = true;
     }
 
