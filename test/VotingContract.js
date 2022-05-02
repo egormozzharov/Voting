@@ -37,10 +37,7 @@ describe("VotingContract", function () {
     widthdrawAddr = await addr3.getAddress();
     votingStartDate = Math.floor(new Date().getTime() / 1000);
 
-    candidateParams = [
-      {candidateName: firstCandidateName, candidateAddress: firstCandidateAddr, voteCount: 0},
-      {candidateName: secondCandidateName, candidateAddress: secondCandidateAddr, voteCount: 0}
-    ];
+    candidateParams = [firstCandidateAddr, secondCandidateAddr];
 
     const votingContractFactory = await ethers.getContractFactory("VotingContract", owner);
     votingContract = await votingContractFactory.deploy();
@@ -62,7 +59,7 @@ describe("VotingContract", function () {
       expect(votingInfo.votingState).to.equal(1);
       expect(votingInfo.votingBalance).to.equal(0);
       expect(votingInfo.withDrawOccured).to.equal(false);
-      expect(candidateInfo.candidateName).to.equal(firstCandidateName);
+      expect(candidateInfo.candidateAddress).to.equal(firstCandidateAddr);
       expect(candidateInfo.voteCount).to.equal(0);
     });
   });

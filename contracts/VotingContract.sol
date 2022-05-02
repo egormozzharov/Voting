@@ -23,7 +23,6 @@ contract VotingContract {
     }
 
     struct Candidate {
-        string candidateName;
         address candidateAddress; 
         uint voteCount; 
     }
@@ -36,7 +35,7 @@ contract VotingContract {
         contractOwner = payable(msg.sender);
     }
 
-    function createVote(string calldata voteName, Candidate[] calldata candidatesParams, uint256 startDate)
+    function createVote(string calldata voteName, address[] calldata candidateAddresses, uint256 startDate)
         external
     {   
         require(msg.sender == contractOwner, "Only contractOwner can start and end the voting");
@@ -49,10 +48,13 @@ contract VotingContract {
 
         mapping(address => Candidate) storage candidates = voting.candidates;
         address[] storage candidatesAddresses = voting.candidatesAddresses;
-        for (uint i = 0; i < candidatesParams.length; i++){
-            Candidate memory candidate = candidatesParams[i];
-            candidate.voteCount = 0;
-            candidates[candidate.candidateAddress] = candidate;
+        for (uint i = 0; i < candidateAddresses.length; i++){
+            address candidateAddress = candidateAddresses[i];
+            Candidate memory candidate = Candidate({
+                candidateAddress: candidateAddress,
+                voteCount: 0
+            });
+            candidates[candidateAddress] = candidate;
             candidatesAddresses.push(candidate.candidateAddress);
         }
     }
